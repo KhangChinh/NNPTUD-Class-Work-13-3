@@ -13,19 +13,19 @@ let options = {
 module.exports = {
     userCreateValidator: [
         body('email').notEmpty().withMessage("Email khong duoc rong").isEmail().withMessage('email sai dinh dang'),
-        body('username').isAlphanumeric().withMessage("username khong duoc chua ki tu dac biet"),
+        body('username').matches(/^[a-zA-Z0-9._-]+$/).withMessage("username chi duoc chua chu cai, so, dau cham, gach duoi va gach ngang"),
         body('password').isStrongPassword(options.password).withMessage(`password dai it nhat ${options.password.minLength} ki tu, trong do co it nhat ${options.password.minNumbers} so ${options.password.minUppercase} chu hoa ${options.password.minLowercase} chu thuong ${options.password.minSymbols} ki tu dac biet`),
     ],
     userUpdateValidator: [
         body('email').optional({
             checkFalsy: true
         }).isEmail().withMessage('email sai dinh dang').normalizeEmail(),
-        body('username').optional().isAlphanumeric().withMessage("username khong duoc chua ki tu dac biet"),
+        body('username').optional().matches(/^[a-zA-Z0-9._-]+$/).withMessage("username chi duoc chua chu cai, so, dau cham, gach duoi va gach ngang"),
         body('password').isStrongPassword(options.password).withMessage(`password dai it nhat ${options.password.minLength} ki tu, trong do co it nhat ${options.password.minNumbers} so ${options.password.minUppercase} chu hoa ${options.password.minLowercase} chu thuong ${options.password.minLowercase} chu thuong ${options.password.minSymbols} ki tu dac biet`),
     ],
     RegisterValidator: [
         body('email').notEmpty().withMessage("email khong duoc rong").bail().isEmail().withMessage('email sai dinh dang').normalizeEmail(),
-        body('username').notEmpty().isAlphanumeric().withMessage("username khong duoc chua ki tu dac biet"),
+        body('username').notEmpty().matches(/^[a-zA-Z0-9._-]+$/).withMessage("username chi duoc chua chu cai, so, dau cham, gach duoi va gach ngang"),
         body('password').notEmpty().isStrongPassword(options.password).withMessage(`password dai it nhat ${options.password.minLength} ki tu, trong do co it nhat ${options.password.minNumbers} so ${options.password.minUppercase} chu hoa ${options.password.minLowercase} chu thuong ${options.password.minSymbols} ki tu dac biet`),
     ],
     changePasswordValidator: [
