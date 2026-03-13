@@ -27,6 +27,10 @@ module.exports = {
         body('email').notEmpty().withMessage("email khong duoc rong").bail().isEmail().withMessage('email sai dinh dang').normalizeEmail(),
         body('username').notEmpty().isAlphanumeric().withMessage("username khong duoc chua ki tu dac biet"),
         body('password').notEmpty().isStrongPassword(options.password).withMessage(`password dai it nhat ${options.password.minLength} ki tu, trong do co it nhat ${options.password.minNumbers} so ${options.password.minUppercase} chu hoa ${options.password.minLowercase} chu thuong ${options.password.minSymbols} ki tu dac biet`),
+    ],
+    changePasswordValidator: [
+        body('oldpassword').notEmpty().withMessage("Mat khau cu khong duoc de trong"),
+        body('newpassword').notEmpty().withMessage("Mat khau moi khong duoc de trong").isStrongPassword(options.password).withMessage(`Mat khau moi phai dai it nhat ${options.password.minLength} ki tu, bao gom chu hoa, chu thuong, so va ki tu dac biet`),
     ]
     ,
     handleResultValidator: function (req, res, next) {

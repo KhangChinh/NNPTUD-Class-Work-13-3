@@ -2,10 +2,14 @@ var express = require('express');
 var router = express.Router();
 let { users } = require('../utils/data');
 let { IncrementalId } = require('../utils/IncrementalIdHandler');
-let { RegisterValidator, handleResultValidator } = require('../utils/validatorHandler')
+let { RegisterValidator, changePasswordValidator, handleResultValidator } = require('../utils/validatorHandler')
 let bcrypt = require('bcrypt')
 let jwt = require('jsonwebtoken')
 let { checkLogin } = require('../utils/authHandler')
+const fs = require('fs');
+const path = require('path');
+
+const privateKey = fs.readFileSync(path.join(__dirname, '../keys/private.key'), 'utf8');
 
 /* REGISTER */
 router.post('/register', RegisterValidator, handleResultValidator, async function (req, res, next) {
@@ -48,13 +52,15 @@ router.post('/login', async function (req, res, next) {
         // Lock check
         if (getUser.lockTime && new Date(getUser.lockTime) > new Date()) {
             return res.status(403).send("tai khoan dang bi ban");
+            return;
         }
 
         if (bcrypt.compareSync(password, getUser.password)) {
             getUser.loginCount = 0;
             let token = jwt.sign({
                 id: getUser.id
-            }, "secret", {
+            }, privateKey, {
+                algorithm: 'RS256',
                 expiresIn: '30d'
             })
             res.send(token)
@@ -73,5 +79,22 @@ router.post('/login', async function (req, res, next) {
 router.get('/me', checkLogin, function (req, res, next) {
     res.send(req.user)
 })
+
+/* CHANGE PASSWORD */
+router.post('/change-password', checkLogin, changePasswordValidator, handleResultValidator, async function (req, res, next) {
+    const { oldpassword, newpassword } = req.body;
+    const user = req.user;
+
+    // Verify old password
+    if (!bcrypt.compareSync(oldpassword, user.password)) {
+        return res.status(400).send({ message: "Mat khau cu khong chinh xac" });
+    }
+
+    // Hash and save new password
+    user.password = bcrypt.hashSync(newpassword, 10);
+    user.updatedAt = new Date();
+
+    res.send({ message: "Doi mat khau thanh cong" });
+});
 
 module.exports = router;
